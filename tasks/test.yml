@@ -1,0 +1,78 @@
+---
+
+- debug: var=opts_test
+
+- name: Test user
+  block:
+  - name: Get user info
+    ansible.builtin.getent:
+      database: passwd
+      key: "{{opts_test.user}}"
+      fail_key: no
+  - debug: var=ansible_facts.getent_passwd
+  - name: Register user info
+    vars:
+      user_data: "{{ansible_facts.getent_passwd.values() | first }}"
+    set_fact:
+      user_info:
+        login:     "{{ansible_facts.getent_passwd.keys() | first }}"
+        pass:      "{{user_data[0] | default('n/a') }}"
+        id:        "{{user_data[1] | default('n/a') }}"
+        id_group:  "{{user_data[2] | default('n/a') }}"
+        name: "{{user_data[3] | default('n/a') }}"
+        home:      "{{user_data[4] | default('n/a') }}"
+        shell:     "{{user_data[5] | default('n/a') }}"
+  - name: Check user's home
+    stat:
+      path: "{{user_info.home}}"
+    register: path
+  - debug: var=path
+  - debug: var=user_info
+
+- name: Check group
+  debug: msg="Group {{opts_test.group}} exists!"
+  when: opts_test.group in groups
+
+- name: Test user/password
+  vars:
+    ansible_ssh_user: "{{opts_test.user}}"
+    ansible_ssh_pass: "{{opts_test.pass}}"
+    ansible_become: no
+  ping:
+  ignore_unreachable: yes
+  ignore_errors: yes
+  changed_when: false
+  register: ssh_test
+- debug: var=ssh_test
+
+- meta: end_play
+
+- name: Add group
+  ansible.builtin.group:
+    name: "{{opts_user.group}}"
+
+#Need to fix error  "User is currently used by process ..."
+#Wordkaround kill all processes of this user
+- name: Add user
+  vars:
+    pw_hashed: "{{ opts_user.pass | password_hash('sha512') }}"
+    home_dir:  "/home/{{opts_user.user}}/"
+  ansible.builtin.user:
+    name: "{{opts_user.user}}"
+    password: "{{ pw_hashed }}"
+    group: "{{ opts_user.group | default(omit) }}"
+    groups: sftp_users
+    append: yes
+    create_home: "{{ opts_user.create_home }}"
+    home: "{{ opts_user.home_dir }}"
+
+- name: mount site dir to home
+  when: (opts_user.site_dir is defined)
+  vars:
+    opt_rw: "bind,rw,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
+    opt_ro: "bind,ro,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
+    args:
+      mounts_v2:
+      - {path: "{{opts_user.mount_dir}}" ,src: "{{opts_user.site_dir}}" ,state: 'mounted' ,fstype: 'none' ,opts: "{{opt_rw}}" }
+  include_role: {name: gz_common ,tasks_from: mounts_v2}
+####################################

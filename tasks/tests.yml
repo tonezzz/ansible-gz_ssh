@@ -1,0 +1,9 @@
+---
+
+- name: Test ssh
+  loop: "{{opts_tests.user_items}}"
+  loop_control: {loop_var: test_item}
+  vars:
+    opts_test: "{{ test_item }}"
+  include_tasks: test.yml
+  #debug: var=opts_test

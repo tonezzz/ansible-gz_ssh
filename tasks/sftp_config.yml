@@ -1,0 +1,41 @@
+---
+
+- name: Prepare group sftp_users
+  ansible.builtin.group:
+    name: "sftp_users"
+
+- name: "Add config block"
+  when: (opts_sftp_config.add_config_block is defined) and opts_sftp_config.add_config_block
+  blockinfile:
+    #block: "{{ lookup('file', opts_sshd_config.block) }}"
+    block: |
+      #Prepare for jailed sftp account
+      Match Group sftp_users
+        ChrootDirectory /chroot/%u/www
+        ForceCommand internal-sftp
+        PasswordAuthentication yes
+        AllowAgentForwarding no
+        AllowTcpForwarding no
+        X11Forwarding no
+        PermitTunnel no
+    path: "{{opts_sshd_config.file}}"
+    marker: "#{mark} {{opts_sshd_config.marker_text}}"
+    insertafter: "{{opts_sshd_config.insertafter}}"
+    backup: "{{opts_sshd_config.backup}}"
+    validate: "{{opts_sshd_config.validate}}"
+  tags: [ssh_cfg]
+  notify:
+    - "restart sshd"
+
+- name: "Del config block"
+  when: opts_sshd_config.del_config_block is defined
+  blockinfile:
+    block: ''
+    path: "{{opts_sshd_config.file}}"
+    marker: "#{mark} {{opts_sshd_config.marker_text}}"
+    insertafter: "{{opts_sshd_config.insertafter}}"
+    backup: "{{opts_sshd_config.backup}}"
+    validate: "{{opts_sshd_config.validate}}"
+  tags: [ssh_cfg_del,never]
+  notify:
+    - "restart sshd"

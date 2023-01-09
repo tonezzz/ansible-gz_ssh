@@ -1,0 +1,14 @@
+---
+
+- name: sshd_config
+  vars:
+    ssh_info:
+      #ansible_ssh_host:               "{{ansible_ssh_host}}"
+      ansible_ssh_port:               "{{ansible_ssh_port}}"
+      #ansible_ssh_user:               "{{ansible_ssh_user}}"
+      #ansible_ssh_private_key_file:   "{{ansible_ssh_private_key_file}}"
+    sshd_config: "{{sshd_info}}"
+    items: "{{ssh_info | dict2items}}"
+  block:
+  - debug: var=items
+  

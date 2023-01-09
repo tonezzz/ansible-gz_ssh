@@ -1,0 +1,10 @@
+---
+
+- debug: var=opts_ssh
+- meta: end_play
+
+#- {name: sshd_config ,when: (opts_ssh.sshd_config is defined)  ,vars: {opts_sshd_config:  "{{ gz_ssh_config.sshd_config | default({}) | combine(opts_ssh.sshd_config,recursive=True) }}"} ,include_tasks: sshd_config.yml }
+- {name: sftp_config ,when: (opts_ssh.sftp_config is defined)  ,vars: {opts_sftp_config:  "{{ gz_ssh_config.sftp_config | combine(opts_ssh.sftp_config,recursive=True) }}"} ,include_tasks: sftp_config.yml }
+- {name: users       ,when: (opts_ssh.users is defined)        ,vars: {opts_users:        "{{ gz_ssh_config.users}}"}       ,include_tasks: users.yml }
+- {name: sftps       ,when: (opts_ssh.sftps is defined)        ,vars: {opts_sftps:        "{{ gz_ssh_config.sftps       | combine(opts_ssh.sftps,recursive=True) }}"}       ,include_tasks: sftps.yml }
+- {name: tests       ,when: (opts_ssh.tests is defined)        ,vars: {opts_tests:        "{{ gz_ssh_config.tests       | combine(opts_ssh.tests,recursive=True) }}"}       ,include_tasks: tests.yml }

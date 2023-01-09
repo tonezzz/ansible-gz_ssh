@@ -1,0 +1,22 @@
+---
+dependencies: {}
+
+galaxy_info:
+  role_name: 'ssh'
+  auther: 'tonezzz'
+  description: 'SSH for Linux'
+  company: 'Surf Thailand'
+  license: 'Open'
+  min_ansible_version: 2.4
+  platforms:
+  - name: 'Debian'
+    versions:
+    - 9
+  - name: 'Ubuntu'
+    versions:
+    - trusty
+    #- xenial
+    #- bionic
+  galaxy_tags:
+  - ssh
+allow_duplicates: true

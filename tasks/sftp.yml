@@ -1,0 +1,57 @@
+---
+
+- debug: var=opts_user
+#- meta: end_play
+
+- name: Add group
+  when: (opts_user.to_do.create_group is defined) and opts_user.to_do.create_group
+  ansible.builtin.group:
+    name: "{{opts_user.group}}"
+
+#Need to fix error  "User is currently used by process ..."
+#Wordkaround kill all processes of this user
+- name: Create user
+  when: (opts_user.to_do.create_user is defined) and opts_user.to_do.create_user
+  vars:
+    pw_hashed: "{{ opts_user.pass | password_hash('sha512') }}"
+  block:
+  - name: Stop services
+    ignore_errors: yes
+    vars:
+      opts_common:
+        services:
+          state: stopped
+          service_items:
+          - 'php7.4-fpm'
+    include_role: name=gz_common
+  - name: Add user
+    ansible.builtin.user:
+      name: "{{opts_user.user}}"
+      password: "{{ pw_hashed }}"
+      group: "{{ opts_user.group | default(omit) }}"
+      groups: sftp_users
+      append: yes
+      create_home: "{{ opts_user.create_home | default(omit) }}"
+      home: "{{ opts_user.home_dir | default(omit) }}"
+      shell: "{{opts_user.shell | default(omit) }}"
+  - name: Start services
+    ignore_errors: yes
+    vars:
+      opts_common:
+        services:
+          state: started
+          service_items:
+          - 'php7.4-fpm'
+    include_role: name=gz_common
+
+- name: Create link
+  when: (opts_user.to_do.create_chroot is defined) and opts_user.to_do.create_chroot
+  vars:
+    opt_rw: "bind,rw,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
+    opt_ro: "bind,ro,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
+    opts_common:
+      #create_dirs_v2:
+      #- {path: "{{opts_user.mount_dir}}" ,owner: "{{opts_user.user}}" ,group: "{{opts_user.user}}"  ,mode: 'u=rw,g=r,o=r' ,recurse: yes }
+      mounts_v2:
+      - {path: "{{opts_user.mount_dir}}" ,src: "{{opts_user.site_dir}}" ,state: 'mounted' ,fstype: 'none' ,enabled: yes ,opts: "{{opt_rw}}" }
+  include_role: {name: gz_common}

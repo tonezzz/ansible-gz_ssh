@@ -1,0 +1,29 @@
+---
+
+#Control vars with default
+
+#Module configurations
+gz_ssh_config:
+  sftp:
+    shell: /bin/bash
+  sftps: {}
+  tests: {}
+  sftp_config:                      #Cfg template
+    file: '/etc/ssh/sshd_config'
+    validate: '/usr/sbin/sshd -T -f %s'
+    backup: yes
+    insertafter: "EOF"
+    marker_text: 'GZ_SSH_CFG'
+  group:                    #Group template
+    action: ''
+    name: 'sftp_users'
+  users:
+    action: ''
+    user_default:                     #User template
+      action: ''
+      group: 'sftp_users'
+      groups: ['sftp_users']
+      shell: '/bin/bash'
+      create_home: yes
+      #move_home: yes
+      remove: yes             #Remove home

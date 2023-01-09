@@ -1,0 +1,11 @@
+---
+
+#- debug: var=opts_sftps
+#- meta: end_play
+
+- name: Add users
+  loop: "{{opts_sftps.user_items}}"
+  loop_control: {loop_var: user_item1}
+  vars:
+    opts_user: "{{ gz_ssh_config.sftp | combine(user_item1,recursive=true) }}"
+  include_tasks: sftp.yml

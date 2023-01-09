@@ -1,0 +1,9 @@
+---
+
+- name: Add users
+  when: (opts_users.user_items is defined)
+  loop: "{{opts_users.user_items}}"
+  loop_control: {loop_var: opts_user}
+  #vars:
+  #  opts_user: "{{ opts_users.user_default | combine(user_item1,recursive=true) }}"
+  include_tasks: user.yml
