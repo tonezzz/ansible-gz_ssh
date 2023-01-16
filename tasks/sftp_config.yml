@@ -6,6 +6,8 @@
 
 - name: "Add config block"
   when: (opts_sftp_config.add_config_block is defined) and opts_sftp_config.add_config_block
+  vars:
+    sftp_config_opts: "{{ opts_sftp_config | combine(gz_ssh_config,recursive=True) }}"
   blockinfile:
     #block: "{{ lookup('file', opts_sshd_config.block) }}"
     block: |
@@ -18,24 +20,24 @@
         AllowTcpForwarding no
         X11Forwarding no
         PermitTunnel no
-    path: "{{opts_sshd_config.file}}"
-    marker: "#{mark} {{opts_sshd_config.marker_text}}"
-    insertafter: "{{opts_sshd_config.insertafter}}"
-    backup: "{{opts_sshd_config.backup}}"
-    validate: "{{opts_sshd_config.validate}}"
+    path: "{{sftp_config_opts.sshd_config.file}}"
+    marker: "#{mark} {{sftp_config_opts.sshd_config.marker_text}}"
+    insertafter: "{{sftp_config_opts.sshd_config.insertafter}}"
+    backup: "{{sftp_config_opts.sshd_config.backup}}"
+    validate: "{{sftp_config_opts.sshd_config.validate}}"
   tags: [ssh_cfg]
   notify:
-    - "restart sshd"
+    - "restart ssh"
 
 - name: "Del config block"
   when: opts_sshd_config.del_config_block is defined
   blockinfile:
     block: ''
-    path: "{{opts_sshd_config.file}}"
-    marker: "#{mark} {{opts_sshd_config.marker_text}}"
-    insertafter: "{{opts_sshd_config.insertafter}}"
-    backup: "{{opts_sshd_config.backup}}"
-    validate: "{{opts_sshd_config.validate}}"
+    path: "{{sftp_config_opts.sshd_config.file}}"
+    marker: "#{mark} {{sftp_config_opts.sshd_config.marker_text}}"
+    insertafter: "{{sftp_config_opts.sshd_config.insertafter}}"
+    backup: "{{sftp_config_opts.sshd_config.backup}}"
+    validate: "{{sftp_config_opts.sshd_config.validate}}"
   tags: [ssh_cfg_del,never]
   notify:
-    - "restart sshd"
+    - "restart ssh"
