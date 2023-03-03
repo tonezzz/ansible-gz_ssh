@@ -1,0 +1,28 @@
+---
+
+- name: Fix chroot perm
+  when: opts_fix_chroot_perm is defined
+  vars:
+    fix_opts: 
+      domain: "wsl09.gizmo-thailand.com"
+      user: "{{opts_fix_chroot_perm.user}}"
+      group: "{{opts_fix_chroot_perm.user}}"
+      dirs:
+      - /chroot
+      - "/chroot/{{opts_fix_chroot_perm.user}}"
+      - "/chroot/{{opts_fix_chroot_perm.user}}/www/"
+      - "/chroot/{{opts_fix_chroot_perm.user}}/www/{{opts_fix_chroot_perm.user}}.{{opts_fix_chroot_perm.domain}}"
+    list:
+      - {path: "{{fix_opts.dirs[0]}}" ,user: root ,group: root ,mode: '0644'}
+      - {path: "{{fix_opts.dirs[1]}}" ,user: root ,group: root, mode: '0644'}
+      - {path: "{{fix_opts.dirs[2]}}" ,user: root ,group: root, mode: '0655'}
+      - {path: "{{fix_opts.dirs[3]}}" ,user: "{{fix_opts.user}}" ,group: "{{fix_opts.group}}", mode: '0755'}
+  #debug: var=list
+  #debug: var=item
+  loop: "{{list}}"
+  ansible.builtin.file:
+    path: "{{item.path}}"
+    owner: "{{item.user}}"
+    group: "{{item.group}}"
+    mode: "{{item.mode}}"
+
