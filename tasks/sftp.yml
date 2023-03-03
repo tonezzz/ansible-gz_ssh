@@ -47,8 +47,8 @@
 - name: Create link
   when: (opts_user.to_do.create_chroot is defined) and opts_user.to_do.create_chroot
   vars:
-    opt_rw: "bind,rw,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
-    opt_ro: "bind,ro,auto,gid={{opts_user.group}},uid={{opts_user.user}}"
+    opt_rw: "bind,rw,auto,gid={{opts_user.group}},uid={{opts_user.user}},errors=continue"
+    opt_ro: "bind,ro,auto,gid={{opts_user.group}},uid={{opts_user.user}},errors=continue"
     opts_common:
       #create_dirs_v2:
       #- {path: "{{opts_user.mount_dir}}" ,owner: "{{opts_user.user}}" ,group: "{{opts_user.user}}"  ,mode: 'u=rw,g=r,o=r' ,recurse: yes }
