@@ -1,17 +1,17 @@
 ---
 
 - name: Fix chroot perm
-  when: opts_fix_chroot_perm is defined
+  when: opts_fix is defined
   vars:
     fix_opts: 
       domain: "wsl09.gizmo-thailand.com"
-      user: "{{opts_fix_chroot_perm.user}}"
-      group: "{{opts_fix_chroot_perm.user}}"
+      user: "{{opts_fix.user}}"
+      group: "{{opts_fix.user}}"
       dirs:
       - /chroot
-      - "/chroot/{{opts_fix_chroot_perm.user}}"
-      - "/chroot/{{opts_fix_chroot_perm.user}}/www/"
-      - "/chroot/{{opts_fix_chroot_perm.user}}/www/{{opts_fix_chroot_perm.user}}.{{opts_fix_chroot_perm.domain}}"
+      - "/chroot/{{opts_fix.user}}"
+      - "/chroot/{{opts_fix.user}}/www/"
+      - "/chroot/{{opts_fix.user}}/www/{{opts_fix.user}}.{{opts_fix.domain}}"
     list:
       - {path: "{{fix_opts.dirs[0]}}" ,user: root ,group: root ,mode: '0644'}
       - {path: "{{fix_opts.dirs[1]}}" ,user: root ,group: root, mode: '0644'}
