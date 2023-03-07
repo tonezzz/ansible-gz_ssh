@@ -16,7 +16,7 @@
     pw_hashed: "{{ opts_user.pass | password_hash('sha512') }}"
   block:
   - name: Stop services
-    ignore_errors: yes
+    ignore_errors: True
     vars:
       opts_common:
         services:
@@ -35,7 +35,7 @@
       home: "{{ opts_user.home_dir | default(omit) }}"
       shell: "{{opts_user.shell | default(omit) }}"
   - name: Start services
-    ignore_errors: yes
+    ignore_errors: True
     vars:
       opts_common:
         services:
