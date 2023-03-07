@@ -1,0 +1,13 @@
+---
+
+- name: Fix chroot home
+  when: opts_fix_chroot_home is defined
+  vars:
+    fix_opts: 
+      new_home: "/chroot/{{item}}"
+  #debug: var=item
+  loop: "{{opts_fix.users}}"
+  ansible.builtin.user:
+    name: "{{item}}"
+    home: "{{fix_opts.new_home}}"
+
